@@ -1,6 +1,6 @@
 import { createPortal, useFrame, useThree } from '@react-three/fiber';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { BackSide, Matrix4, OrthographicCamera, Ray, Scene, Vector3 } from 'three';
+import { BackSide, Matrix4, NoToneMapping, OrthographicCamera, Ray, Scene, Vector3 } from 'three';
 import { TilesRendererContext } from './TilesRenderer';
 import { closestRayEllipsoidSurfacePointEstimate } from '../../three/controls/utils';
 
@@ -73,11 +73,14 @@ function RenderPortal( props ) {
 
 		const currentAutoClear = gl.autoClear;
 		gl.autoClear = false;
+		const prevTonemapping = gl.toneMapping;
+		gl.toneMapping = NoToneMapping;
 
 		gl.clearDepth();
 		gl.render( scene, camera );
 
 		gl.autoClear = currentAutoClear;
+		gl.toneMapping = prevTonemapping;
 
 	}, renderPriority );
 
@@ -248,7 +251,7 @@ export function CompassGizmo( { children, overrideRenderLoop, mode = '3d', margi
 					scale={ scale }
 					position={ [
 						size.width / 2 - marginX - scale / 2,
-						- size.height / 2 + marginY + scale / 2,
+						size.height / 2 - marginY - scale / 2,
 						0,
 					] }
 

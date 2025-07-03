@@ -118,6 +118,9 @@ export class TileCompressionPlugin {
 			compressUvs: false,
 			compressPosition: false,
 
+			//remove batch?
+			stripBatchAttribute: false,
+
 			// the TypedArray type to use when compressing the attributes
 			uvType: Int8Array,
 			normalType: Int8Array,
@@ -141,6 +144,8 @@ export class TileCompressionPlugin {
 			compressUvs,
 			compressNormals,
 			compressPosition,
+
+			stripBatchAttribute,
 
 			uvType,
 			normalType,
@@ -181,6 +186,13 @@ export class TileCompressionPlugin {
 					if ( uv3 ) attributes.uv3 = compressAttribute( uv3, uvType );
 
 				}
+
+				if ( stripBatchAttribute ) {
+
+					( geometry ).deleteAttribute( '_batchid' );
+
+				}
+
 
 				if ( generateNormals && ! attributes.normals ) {
 

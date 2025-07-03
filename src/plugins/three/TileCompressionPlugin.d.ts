@@ -9,7 +9,7 @@ export class TileCompressionPlugin {
 		compressNormals?: boolean,
 		compressUvs?: boolean,
 		compressPosition?: boolean,
-
+		stripBatchAttribute?: boolean,
 		uvType?: TypedArray,
 		normalType?: TypedArray,
 		positionType?: TypedArray,

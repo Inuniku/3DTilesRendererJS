@@ -24,6 +24,12 @@ class PriorityQueue {
 
 		};
 
+		this.priorityFunction = ( tile ) => {
+
+			throw new Error( 'PriorityQueue: PriorityFunction not defined.' );
+
+		};
+
 		// Customizable scheduling callback. Default using requestAnimationFrame()
 		this.schedulingCallback = func => {
 
@@ -42,9 +48,12 @@ class PriorityQueue {
 
 	sort() {
 
-		const priorityCallback = this.priorityCallback;
 		const items = this.items;
-		items.sort( priorityCallback );
+		items.forEach( ( item ) => item.__priority = this.priorityFunction( item ) );
+
+		//items.sort( priorityCallback );
+		// reverse sort for because list is read from back
+		items.sort( ( a, b ) => - a.__priority + b.__priority );
 
 	}
 

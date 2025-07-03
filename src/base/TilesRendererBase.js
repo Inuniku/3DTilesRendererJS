@@ -4,6 +4,7 @@ import { PriorityQueue } from '../utilities/PriorityQueue.js';
 import { markUsedTiles, toggleTiles, markVisibleTiles, markUsedSetLeaves, traverseSet } from './traverseFunctions.js';
 import { UNLOADED, LOADING, PARSING, LOADED, FAILED } from './constants.js';
 import { throttle } from '../utilities/throttle.js';
+import { MathUtils } from 'three';
 
 const PLUGIN_REGISTERED = Symbol( 'PLUGIN_REGISTERED' );
 
@@ -44,6 +45,67 @@ const priorityCallback = ( a, b ) => {
 
 };
 
+
+function makeBool( value, shift ) {
+
+	return ( value ? 1 : 0 ) * Math.pow( 10, shift );
+
+}
+
+function makeNormalizedDigits( value, min, max, digits, shift ) {
+
+	const number = MathUtils.clamp( value, min, max ) / ( max - min );
+	return Math.round( number * Math.pow( 10, digits ) ) * Math.pow( 10, shift );
+
+}
+
+function makeDigits( value, digits, shift ) {
+
+	return Math.round( value * Math.pow( 10, digits ) ) * Math.pow( 10, shift );
+
+}
+
+const calculatePriority = ( tileSet ) => ( tile ) => {
+
+
+	const reverseError = 1 - tile.__error;
+
+	const priorityDeferred = tile.__priorityDeferred ?? false;
+	const foveatedFactor = tile.__foveatedFactor ?? 0;
+
+
+	let visibility = 2;
+	if ( tile.__inFrustum ) {
+
+		visibility --;
+
+	}
+	if ( tile.__used ) {
+
+		visibility --;
+
+	}
+
+	const d1 = makeDigits( visibility, 0, 2, 1, 9 );
+	const d2 = makeBool( priorityDeferred, 8 );
+	const d3 = makeNormalizedDigits( foveatedFactor, 0, 2, 4, 4 );
+	const d4 = makeNormalizedDigits( reverseError, 0, 100, 4, 0 );
+
+	const result = d1 + d2 + d3 + d4;
+	// preloadFlightDigits(1) | foveatedDeferDigits(1) | foveatedDigits(4) | preloadProgressiveResolutionDigits(1) | preferredSortingDigits(4) . depthDigits(the decimal digits)
+
+
+	//console.log( result, d1, d2, d3 );
+
+
+
+	return result;
+
+
+};
+
+
+
 // lru cache unload callback that takes two tiles to compare. Returning 1 means "tile a"
 // is unloaded first.
 const lruPriorityCallback = ( a, b ) => {
@@ -76,6 +138,26 @@ const lruPriorityCallback = ( a, b ) => {
 	}
 
 	return 0;
+
+};
+
+const calculateLRUPriority = ( tile ) => {
+
+	const reverseError = 1 - tile.__error;
+	//const loadingState = 3 - tile.__loadingState;
+	const priorityDeferred = tile.__priorityDeferred ?? false;
+	const foveatedFactor = tile.__foveatedFactor ?? 0;
+
+
+	//const d1 = makeDigits( loadingState, 1, 9 );
+	const d2 = makeBool( priorityDeferred, 8 );
+	const d3 = makeNormalizedDigits( foveatedFactor, 0, 2, 4, 4 );
+	const d4 = makeNormalizedDigits( reverseError, 0, 100, 4, 0 );
+
+	const result = d2 + d3 + d4;
+	// preloadFlightDigits(1) | foveatedDeferDigits(1) | foveatedDigits(4) | preloadProgressiveResolutionDigits(1) | preferredSortingDigits(4) . depthDigits(the decimal digits)
+
+	return result;
 
 };
 
@@ -124,19 +206,24 @@ export class TilesRendererBase {
 
 		const lruCache = new LRUCache();
 		lruCache.unloadPriorityCallback = lruPriorityCallback;
+		lruCache.unloadPriorityFunction = calculateLRUPriority;
 
 		const downloadQueue = new PriorityQueue();
-		downloadQueue.maxJobs = 10;
+		downloadQueue.maxJobs = 1;
 		downloadQueue.priorityCallback = priorityCallback;
-
+		downloadQueue.priorityFunction = calculatePriority( this );
+		downloadQueue.name = 'downloadQueue';
 		const parseQueue = new PriorityQueue();
 		parseQueue.maxJobs = 1;
 		parseQueue.priorityCallback = priorityCallback;
-
+		parseQueue.priorityFunction = calculatePriority( this );
+		parseQueue.name = 'parseQueue';
 		const processNodeQueue = new PriorityQueue();
-		processNodeQueue.maxJobs = 25;
+		processNodeQueue.maxJobs = 100000000000;
 		processNodeQueue.priorityCallback = priorityCallback;
-		processNodeQueue.log = true;
+		processNodeQueue.priorityFunction = ( tile ) => - tile.geometricError;
+		processNodeQueue.name = 'processNodeQueue';
+		//processNodeQueue.log = true;
 
 		this.visibleTiles = new Set();
 		this.activeTiles = new Set();
@@ -338,7 +425,6 @@ export class TilesRendererBase {
 
 		usedSet.forEach( tile => lruCache.markUnused( tile ) );
 		usedSet.clear();
-
 		markUsedTiles( root, this );
 		markUsedSetLeaves( root, this );
 		markVisibleTiles( root, this );

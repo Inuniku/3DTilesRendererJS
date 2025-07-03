@@ -12,6 +12,9 @@ import {
 	LoadingManager,
 	EventDispatcher,
 	Group,
+	Ray,
+	Sphere,
+	MathUtils
 } from 'three';
 import { raycastTraverse, raycastTraverseFirstHit } from './raycastTraverse.js';
 import { readMagicBytes } from '../utilities/readMagicBytes.js';
@@ -20,6 +23,7 @@ import { ExtendedFrustum } from './math/ExtendedFrustum.js';
 import { estimateBytesUsed } from './utilities.js';
 import { WGS84_ELLIPSOID } from './math/GeoConstants.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DEG2RAD } from 'three/src/math/MathUtils.js';
 
 const _mat = new Matrix4();
 const _euler = new Euler();
@@ -423,9 +427,9 @@ export class TilesRenderer extends TilesRendererBase {
 				isOrthographic: false,
 				sseDenominator: - 1, // used if isOrthographic:false
 				position: new Vector3(),
+				direction: new Vector3(),
 				invScale: - 1,
 				pixelSize: 0, // used if isOrthographic:true
-
 			} );
 
 		}
@@ -445,6 +449,7 @@ export class TilesRenderer extends TilesRendererBase {
 			const info = cameraInfo[ i ];
 			const frustum = info.frustum;
 			const position = info.position;
+			const direction = info.direction;
 			const resolution = cameraMap.get( camera );
 
 			if ( resolution.width === 0 || resolution.height === 0 ) {
@@ -486,6 +491,10 @@ export class TilesRenderer extends TilesRendererBase {
 			position.set( 0, 0, 0 );
 			position.applyMatrix4( camera.matrixWorld );
 			position.applyMatrix4( group.matrixWorldInverse );
+
+			camera.getWorldDirection( direction );
+			direction.transformDirection( group.matrixWorldInverse );
+			direction.normalize();
 
 		}
 
@@ -946,6 +955,70 @@ export class TilesRenderer extends TilesRendererBase {
 
 			}
 
+			const sphere = new Sphere();
+			boundingVolume.getSphere( sphere );
+			const cameraPosition = new Vector3().copy( info.position );
+			const cameraDirection = new Vector3().copy( info.direction );
+
+			const ray = new Ray( cameraPosition, cameraDirection );
+
+			const closestPoint = ray.closestPointToPoint( sphere.center, new Vector3() );
+
+			const distanceToClosestPoint = closestPoint.distanceTo( sphere.center );
+
+
+			const insideSphere = distanceToClosestPoint < sphere.radius;
+			if ( insideSphere ) {
+
+				tile.__foveatedFactor = 0;
+				tile.__priorityDeferred = false;
+
+			} else {
+
+				const closestPointOnSphere = new Vector3().subVectors( closestPoint, sphere.center ).normalize().multiplyScalar( sphere.radius ).add( sphere.center );
+
+				//const insideSphere = distanceToClosestPoint < sphere.radius;
+
+				const directionOnSphere = new Vector3().subVectors( closestPointOnSphere, cameraPosition ).normalize();
+
+				const _foveatedFactor = 1 - directionOnSphere.dot( cameraDirection );
+				const maximumFoveatedFactor = 1.0 - Math.cos( ( cameras[ i ] ).fov * DEG2RAD * 0.5 );
+				const foveatedConeFactor = 0.1 * maximumFoveatedFactor;
+
+				tile.__foveatedFactor = _foveatedFactor;
+
+				if ( _foveatedFactor < foveatedConeFactor ) {
+
+					//tile.__fovFactor = 0;
+
+					tile.__sseRelaxtion = 0;
+					tile.__priorityDeferred = false;
+
+				} else {
+
+					const range = maximumFoveatedFactor - foveatedConeFactor;
+					const normalizedFoveatedFactor = MathUtils.clamp(
+						( _foveatedFactor - foveatedConeFactor ) / range,
+						0.0,
+						1.0,
+					);
+					//tile.__fovFactor = normalizedFoveatedFactor;
+
+
+					const sseRelaxtion = MathUtils.lerp( 0, error, normalizedFoveatedFactor );
+
+					tile.__sseRelaxtion = sseRelaxtion;
+					tile.__priorityDeferred = error - sseRelaxtion < this.errorTarget;
+					// console.log( 'relax', sseRelaxtion );
+
+				}
+
+
+
+			}
+
+
+
 			// Track which camera frustums this tile is in so we can use it
 			// to ignore the error calculations for cameras that can't see it
 			const frustum = cameraInfo[ i ].frustum;
@@ -1027,5 +1100,24 @@ export class TilesRenderer extends TilesRendererBase {
 		this.group.removeFromParent();
 
 	}
+
+}
+
+
+function closestPointOnSphere( ray, sphere, target ) {
+
+	// Vector from ray origin to sphere center
+	const toCenter = new Vector3().subVectors( sphere.center, ray.origin );
+
+	// Project vector onto ray direction
+	const t = toCenter.dot( ray.direction );
+
+	// Closest point on the ray to the sphere center
+	const closestPoint = new Vector3().copy( ray.direction ).multiplyScalar( t ).add( ray.origin );
+
+	// Vector from sphere center to closest point on ray
+	const fromCenterToRay = new Vector3().subVectors( closestPoint, sphere.center );
+
+	return target.copy( fromCenterToRay ).normalize().multiplyScalar( sphere.radius ).add( sphere.center );
 
 }

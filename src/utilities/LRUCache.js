@@ -232,12 +232,15 @@ class LRUCache {
 		const unloaded = itemList.length - loadedSet.size;
 		const excessNodes = Math.max( Math.min( itemList.length - minSize, unused ), 0 );
 		const excessBytes = this.cachedBytes - minBytesSize;
-		const unloadPriorityCallback = this.unloadPriorityCallback || this.defaultPriorityCallback;
+		// const unloadPriorityCallback = this.unloadPriorityCallback || this.defaultPriorityCallback;
 		let needsRerun = false;
 
 		const hasNodesToUnload = excessNodes > 0 && unused > 0 || unloaded && itemList.length > maxSize;
 		const hasBytesToUnload = unused && this.cachedBytes > minBytesSize || unloaded && this.cachedBytes > maxBytesSize;
 		if ( hasBytesToUnload || hasNodesToUnload ) {
+
+			const queue = this;
+			itemList.forEach( item => item.__priority = queue.unloadPriorityFunction( item ) );
 
 			// used items should be at the end of the array, "unloaded" items in the middle of the array
 			itemList.sort( ( a, b ) => {
@@ -252,7 +255,7 @@ class LRUCache {
 
 						// Use the sort function otherwise
 						// higher priority should be further to the left
-						return - unloadPriorityCallback( a, b );
+						return a.__priority - b.__priority;
 
 					} else {
 
