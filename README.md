@@ -35,7 +35,7 @@ _Personal [Google Tiles API Key](https://developers.google.com/maps/documentatio
 
 [Rendering shadows from offscreen tiles example](https://nasa-ammos.github.io/3DTilesRendererJS/example/bundle/offscreenShadows.html)
 
-[Alterate texture overlays](https://nasa-ammos.github.io/3DTilesRendererJS/example/bundle/landformSiteOverlay.html)
+[Alternate texture overlays](https://nasa-ammos.github.io/3DTilesRendererJS/example/bundle/landformSiteOverlay.html)
 
 **Plugins**
 
@@ -305,7 +305,7 @@ See the [plugins documentation](./PLUGINS.md) for GLTFLoader extension plugins, 
 
 ## TilesRenderer
 
-_extends `THREE.EventDispatcher` & [TilesRendererBase](https://github.com/NASA-AMMOS/3DTilesRendererJS/blob/master/src/base/TilesRendererBase.js), which can be used to implement a 3d tiles renderer in other engines_
+_extends `THREE.EventDispatcher` & [TilesRendererBase](https://github.com/NASA-AMMOS/3DTilesRendererJS/blob/master/src/core/TilesRendererBase.js), which can be used to implement a 3d tiles renderer in other engines_
 
 ### events
 
@@ -410,7 +410,7 @@ downloadQueue = new PriorityQueue : PriorityQueue
 
 _NOTE: This cannot be set once [update](#update) is called for the first time._
 
-Queue for downloading tile content. Max jobs defaults to `10`.
+Queue for downloading tile content. Max jobs defaults to `25`.
 
 ### .parseQueue
 
@@ -420,7 +420,7 @@ parseQueue = new PriorityQueue : PriorityQueue
 
 _NOTE: This cannot be modified once [update](#update) is called for the first time._
 
-Queue for parsing downloaded tile content. Max jobs defaults to `1`.
+Queue for parsing downloaded tile content. Max jobs defaults to `5`.
 
 ### .processNodeQueue
 

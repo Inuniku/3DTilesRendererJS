@@ -1,5 +1,5 @@
-import { TilingScheme } from '../src/plugins/three/images/utils/TilingScheme.js';
-import { ProjectionScheme } from '../src/plugins/three/images/utils/ProjectionScheme.js';
+import { TilingScheme } from '../src/three/plugins/images/utils/TilingScheme.js';
+import { ProjectionScheme } from '../src/three/plugins/images/utils/ProjectionScheme.js';
 
 describe( 'TiltingScheme', () => {
 
@@ -15,7 +15,7 @@ describe( 'TiltingScheme', () => {
 		expect( scheme.minLevel ).toBe( 5 );
 		expect( scheme.maxLevel ).toBe( 9 );
 		expect( scheme.levelCount ).toBe( 10 );
-		expect( scheme.aspect ).toBe( 0.5 );
+		expect( scheme.aspectRatio ).toBe( 0.5 );
 		expect( scheme.rootOrigin ).toEqual( [ 0, 0 ] );
 		expect( scheme.rootBounds ).toEqual( [ 0, 0, 1, 1 ] );
 		expect( scheme.getLevel( 4 ) ).toEqual( null );

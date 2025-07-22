@@ -4,7 +4,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.4.13] - Unreleased
+### Added
+- Support for WMTS image overlays.
+- Added WMTSTilesPlugin for generating an ellipsoid.
+- XYZTilesPlugin, XYZImageOverlay: Add support for inverted Y tile order, ability to specif bounds.
+
+### Fixed
+- ImageFormatPlugin: Fixed case where an error could throw if a texture was loaded twice in minor corner cases.
+- GoogleCloudAuthPlugin: Use the default load queue parameters.
+- GoogleCloudAuthPlugin: Fix issue relating to assigned auth url.
+- TileCompressionPlugin: Fix transform not working correctly when model is rotated, scaled.
+- GlobeControls: Fix case where the pivot point visualization was being inconsistently shown when zoomed out.
+- TilesRenderer: Prioritize tile downloads by tile error relative to error target.
+- GoogleCloudAuthPlugin, CesiumIonAuthPlugin: Ensure the new authentication and session token are used when an initial request fails when "autoRefreshToken" is enabled.
+- GlobeControls, EnvironmentControls: Improve the controls behavior when dragging off of the canvas or over other dom elements.
+
+### Changed
+- GlobeControls: Dragging operations now end when dragging off the globe.
+- PriorityQueue: No longer requires a sort callback. If set to "null" then items are processed in the order added.
+
+## [0.4.12] - 2025.07.13
+### Added
+- `3d-tiles-renderer/core` & `3d-tiles-renderer/three` export for dedicated files.
+- `3d-tiles-renderer/core/plugins` & `3d-tiles-renderer/three/plugins` export for dedicated plugins.
+- Added `EnforceNonZeroErrorPlugin`.
+- ImageOverlayPlugin: Add support for splitting tiles to match image tile detail.
+- ImageOverlayPlugin: Planar projection now only works when the projection is within the range 0, 1 along the z-projection axis.
+- ImageOverlayPlugin: Add support for adding downloads to the download queue, tracking used GPU memory in the LRUCache.
+
+### Changed
+- TilesRenderer: Increased default queue sizes from 1 to 5 for parse queue, 10 to 25 for download queue.
+
+### Fixed
+- R3F TilesAttributionOverlay not functioning on non-HTTPS domains.
+- Support for React 19 while maintaining React 18 support.
+- QuantizedMeshPlugin: Fixed case where availability metadata was not interpreted correctly.
+- Fixed case where "screenspace error" could be calculated as "NaN" when the distance to the tile and geometricError are 0.
+- UpdateOnChangePlugin: Fix events not being disposed of properly.
+- QuantizedMeshPlugin: Only parse a mesh if the extension is "terrain".
+- ImageOverlayPlugin: Correctly cancel image tile loading when removing an overlay.
+- TilesRenderer: Fix case where load events could be fired on tiles after they had been disposed when the cache is full.
+- ImageOverlayPlugin: Reduced the epsilon used for calculating which tiled images need to be loaded to avoid seams.
+
+## [0.4.11] - 2025.07.01
 ### Added
 - Add "ImageOverlayPlugin".
 - DebugTilesRenderer: Added "unlit" option.
