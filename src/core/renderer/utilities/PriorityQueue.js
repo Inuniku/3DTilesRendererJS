@@ -44,7 +44,7 @@ class PriorityQueue {
 
 	sort() {
 
-		if(!this.priorityFunction) return;
+		if ( ! this.priorityFunction ) return;
 
 		const items = this.items;
 		items.forEach( ( item ) => item.__priority = this.priorityFunction( item ) );

@@ -192,6 +192,21 @@ export class ImageOverlayPlugin {
 
 		};
 
+		processQueue.priorityFunction = ( item ) => {
+
+			const visible = tiles.visibleTiles.has( item.tile );
+			if ( visible ) {
+
+				return 1000000000 + item.tile.geometricError;
+
+			} else {
+
+				return tiles.downloadQueue.priorityFunction( item );
+
+			}
+
+		};
+
 		// save variables
 		this.tiles = tiles;
 		this.tileComposer = tileComposer;
