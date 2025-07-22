@@ -6,7 +6,7 @@ export class XYZTilesPlugin {
 		pixelSize?: number,
 		levels?: number,
 		tileDimension?: number,
-		projection?: 'ellipsoid' | 'planar',
+		shape?: 'ellipsoid' | 'planar',
 		bounds?: [ number, number, number, number ],
 		useRecommendedSettings?: boolean,
 	} );
@@ -18,7 +18,7 @@ export class TMSTilesPlugin {
 	constructor( options: {
 		center?: boolean,
 		pixelSize?: number,
-		projection?: 'ellipsoid' | 'planar',
+		shape?: 'ellipsoid' | 'planar',
 		useRecommendedSettings?: boolean,
 	} );
 
@@ -31,7 +31,7 @@ export class WMTSTilesPlugin {
 		pixelSize?: number,
 		levels?: number,
 		tileDimension?: number,
-		projection?: 'ellipsoid' | 'planar',
+		shape?: 'ellipsoid' | 'planar',
 		bounds?: [ number, number, number, number ],
 		useRecommendedSettings?: boolean,
 	} );
