@@ -1,6 +1,7 @@
 import { Box3, Frustum, Matrix4, Ray, Sphere, Vector3 } from 'three';
 import { OBB } from './OBB.js';
 import { EllipsoidRegion } from './EllipsoidRegion.js';
+import { Ellipsoid } from './Ellipsoid.js';
 
 export class TileBoundingVolume {
 
@@ -20,6 +21,6 @@ export class TileBoundingVolume {
 	getSphere( target: Sphere ): void;
 	setObbData( data: number[], transform: Matrix4 ): void;
 	setSphereData( x: number, y: number, z: number, radius: number, transform: Matrix4 ): void;
-	setRegionData( ellipsoid: number, west: number, south: number, east: number, north: number, minHeight: number, maxHeight: number ): void;
+	setRegionData( ellipsoid: Ellipsoid, west: number, south: number, east: number, north: number, minHeight: number, maxHeight: number ): void;
 
 }
