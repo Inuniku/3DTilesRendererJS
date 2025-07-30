@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.4.13] - Unreleased
+## [0.4.14] - Unreleased
 ### Added
 - Support for WMTS image overlays.
 - Added WMTSTilesPlugin for generating an ellipsoid.
-- XYZTilesPlugin, XYZImageOverlay: Add support for inverted Y tile order, ability to specif bounds.
+
+## [0.4.13] - 2025.07.27
+### Added
+- XYZTilesPlugin, XYZImageOverlay: Add support for inverted Y tile order, ability to specify bounds.
 
 ### Fixed
 - ImageFormatPlugin: Fixed case where an error could throw if a texture was loaded twice in minor corner cases.
@@ -19,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - TilesRenderer: Prioritize tile downloads by tile error relative to error target.
 - GoogleCloudAuthPlugin, CesiumIonAuthPlugin: Ensure the new authentication and session token are used when an initial request fails when "autoRefreshToken" is enabled.
 - GlobeControls, EnvironmentControls: Improve the controls behavior when dragging off of the canvas or over other dom elements.
+- TilesRenderer: Improved some traversal logic, corrected behavior when encountering empty tiles.
 
 ### Changed
 - GlobeControls: Dragging operations now end when dragging off the globe.

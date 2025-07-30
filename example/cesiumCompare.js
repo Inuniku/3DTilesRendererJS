@@ -1,6 +1,6 @@
 
 import { GlobeControls, TilesRenderer, CAMERA_FRAME, EnvironmentControls } from '3d-tiles-renderer';
-import { Scene, WebGLRenderer, PerspectiveCamera, MathUtils, Sphere, TextureUtils } from 'three';
+import { Scene, WebGLRenderer, PerspectiveCamera, MathUtils, Sphere, TextureUtils, DirectionalLight, AmbientLight } from 'three';
 import { estimateBytesUsed } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import * as Cesium from 'cesium';
 
@@ -133,7 +133,7 @@ function render() {
 	shallowTilesLoaded = 0;
 	traverse( threeViewer.root, t => {
 
-		if ( t.__hasRenderableContent ) {
+		if ( t.__hasRenderableContent && t.__loadingState !== 0 ) {
 
 			shallowTilesLoaded ++;
 			return true;
@@ -180,11 +180,16 @@ function render() {
 	allLoadedTiles = 0;
 	geometryBytes = 0;
 	textureBytes = 0;
-	traverse( cesiumViewer.root, t => {
+	traverse( cesiumViewer.root, ( t, d ) => {
 
 		if ( t._content && t._content.ready ) {
 
-			allLoadedTiles ++;
+			// cesium treats the root node has having content
+			if ( d !== 0 ) {
+
+				allLoadedTiles ++;
+
+			}
 
 			if ( t._content._model ) {
 
@@ -218,8 +223,7 @@ async function initThree() {
 
 	// adjustments to match cesium defaults
 	renderer.domElement.style.imageRendering = 'pixelated';
-	renderer.setPixelRatio( 1 );
-	// renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setPixelRatio( window.devicePixelRatio );
 
 	// scene
 	const scene = new Scene();
@@ -279,27 +283,36 @@ async function initThree() {
 
 		}
 
-		if ( camera.position.length() > 1e5 ) {
+		if ( ! controls ) {
 
-			// controls
-			controls = new GlobeControls( scene, camera, renderer.domElement, null );
-			controls.enableDamping = true;
-			controls.adjustHeight = false;
-			controls.setEllipsoid( tiles.ellipsoid, tiles.group );
+			if ( camera.position.length() > 1e5 ) {
 
-		} else {
+				// controls
+				controls = new GlobeControls( scene, camera, renderer.domElement, null );
+				controls.enableDamping = true;
+				controls.adjustHeight = false;
+				controls.setEllipsoid( tiles.ellipsoid, tiles.group );
 
-			controls = new EnvironmentControls( scene, camera, renderer.domElement, null );
-			controls.enableDamping = true;
-			controls.adjustHeight = false;
+			} else {
+
+				controls = new EnvironmentControls( scene, camera, renderer.domElement, null );
+				controls.enableDamping = true;
+				controls.adjustHeight = false;
+
+			}
 
 		}
-
-
 
 	} );
 
 	scene.add( tiles.group );
+
+	// lights
+	const dirLight = new DirectionalLight( 0xffffff, 2 );
+	dirLight.position.set( 1, 2, 3 );
+
+	const ambLight = new AmbientLight( 0xffffff, 1 );
+	scene.add( dirLight, ambLight );
 
 	// position the camera
 	const lat = 0.5419733570174874;
@@ -390,7 +403,7 @@ async function initCesium() {
 
 	// initialize the tile set
 	const tileset = await Cesium.Cesium3DTileset.fromUrl( url, {
-		loadSiblings: true,
+		// loadSiblings: true,
 		maximumCacheOverflowBytes: 1e20,
 		cacheBytes: 0,
 	} );
