@@ -205,7 +205,7 @@ export function CompassGizmo( { children, overrideRenderLoop, mode = '3d', margi
 		getCameraFocusPoint( defaultCamera, ellipsoid, frame, _pos ).applyMatrix4( frame.matrixWorldInverse );
 		ellipsoid.getPositionToCartographic( _pos, _cart );
 
-		tileEllipsoid
+		ellipsoid
 			.getEastNorthUpFrame( _cart.lat, _cart.lon, 0, _enuMatrix )
 			.premultiply( frame.matrixWorld );
 

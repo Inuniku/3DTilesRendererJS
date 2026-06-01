@@ -68,6 +68,7 @@ const defaultPriorityCallback = ( a, b ) => {
 		return a.traversal.distanceFromCamera > b.traversal.distanceFromCamera ? - 1 : 1;
 
 	} else if ( a.internal.depthFromRenderedParent !== b.internal.depthFromRenderedParent ) {
+		
 		return a.internal.depthFromRenderedParent > b.internal.depthFromRenderedParent ? - 1 : 1;
 
 	}
