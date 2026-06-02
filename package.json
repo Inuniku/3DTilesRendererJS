@@ -69,6 +69,7 @@
     "lint": "eslint . && tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.test.json --noEmit && vitest run",
     "prepublishOnly": "npm run build-lib",
+    "prepare": "npm run build-lib",
     "docs:build": "node utils/docs/build.js"
   },
   "repository": {
