@@ -426,8 +426,8 @@ DEFAULT_LRU_CACHE.unloadPriorityFunction = calculateLRUPriority;
 const DEFAULT_DOWNLOAD_QUEUE = new PriorityQueue();
 DEFAULT_DOWNLOAD_QUEUE.maxJobs = 25;
 DEFAULT_DOWNLOAD_QUEUE.priorityCallback = unifiedPriorityCallback;
-DEFAULT_PARSE_QUEUE.priorityFunction = calculatePriority( this );
-DEFAULT_PARSE_QUEUE.name = 'downloadQueue';
+DEFAULT_DOWNLOAD_QUEUE.priorityFunction = calculatePriority( this );
+DEFAULT_DOWNLOAD_QUEUE.name = 'downloadQueue';
 
 const DEFAULT_PARSE_QUEUE = new PriorityQueue();
 DEFAULT_PARSE_QUEUE.maxJobs = 5;

@@ -93,12 +93,6 @@ export class PriorityQueue {
 
 		};
 
-		this.priorityFunction = ( tile ) => {
-
-			throw new Error( 'PriorityQueue: PriorityFunction not defined.' );
-
-		};
-		
 		// Customizable scheduling callback. Default using requestAnimationFrame()
 		this._schedulingCallback = func => {
 
