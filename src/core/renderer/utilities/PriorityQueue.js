@@ -58,32 +58,12 @@ export class PriorityQueue {
 
 	}
 
-	/**
-	 * Callback used to schedule when to run jobs next, so more work doesn't happen in a
-	 * single frame than there is time for. Defaults to `requestAnimationFrame`. Should be
-	 * overridden in scenarios where `requestAnimationFrame` is not reliable, such as when
-	 * running in WebXR.
-	 * @type {SchedulingCallback}
-	 * @deprecated
-	 */
-	get schedulingCallback() {
-
-		return this._schedulingCallback;
-
-	}
-
-	set schedulingCallback( cb ) {
-
-		console.log( 'PriorityQueue: Setting "schedulingCallback" has been deprecated. Use Scheduler to switch to an XRSession rAF, instead.' );
-		this._schedulingCallback = cb;
-
-	}
-
 	constructor() {
 
 		/**
 		 * Maximum number of jobs that can run concurrently.
 		 * @type {number}
+		 * @default 6
 		 */
 		this.maxJobs = 6;
 
@@ -95,13 +75,15 @@ export class PriorityQueue {
 		/**
 		 * If true, job runs are automatically scheduled after `add` and after each job completes.
 		 * @type {boolean}
+		 * @default true
 		 */
 		this.autoUpdate = true;
 
 		/**
 		 * Comparator used to sort queued items. Higher-priority items should sort last
-		 * (i.e. return positive when `itemA` should run before `itemB`). Defaults to `null`.
+		 * (i.e. return positive when `itemA` should run before `itemB`).
 		 * @type {PriorityCallback|null}
+		 * @default null
 		 */
 		this.priorityCallback = null;
 
@@ -313,6 +295,54 @@ export class PriorityQueue {
 			}
 
 		}
+
+	}
+
+	/**
+	 * Immediately runs the callback for the given item, removing it from the queue.
+	 * Does nothing if the item is not queued.
+	 * @param {any} item
+	 * @returns {Promise<any>|any}
+	 */
+	flush( item ) {
+
+		const { items, callbacks } = this;
+		const index = items.indexOf( item );
+		if ( ! callbacks.has( item ) ) {
+
+			return;
+
+		}
+
+		const { callback, resolve, reject } = callbacks.get( item );
+		callbacks.delete( item );
+		items.splice( index, 1 );
+
+		let result;
+		try {
+
+			result = callback( item );
+
+		} catch ( err ) {
+
+			reject( err );
+			return;
+
+		}
+
+		if ( result instanceof Promise ) {
+
+			result
+				.then( resolve )
+				.catch( reject );
+
+		} else {
+
+			resolve( result );
+
+		}
+
+		return result;
 
 	}
 

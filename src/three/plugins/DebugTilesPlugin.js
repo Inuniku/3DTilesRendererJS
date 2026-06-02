@@ -262,6 +262,7 @@ export class DebugTilesPlugin {
 		 * a black-to-white gradient. Replace with a custom function to use a different color
 		 * ramp.
 		 * @type {GetDebugColorCallback}
+		 * @default ( value, target ) => target.setRGB( value, value, value )
 		 */
 		this.getDebugColor = ( value, target ) => {
 
@@ -389,6 +390,12 @@ export class DebugTilesPlugin {
 		} );
 
 		return result;
+
+	}
+
+	setEmptyTileVisible( tile, visible ) {
+
+		this._onTileVisibilityChange( tile, visible );
 
 	}
 

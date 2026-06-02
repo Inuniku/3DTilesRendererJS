@@ -4,16 +4,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.5.0] - Unreleased
+### Changed
+- Deprecated APIs and fields have been removed.
+- CesiumIonPlugin: Removed warning logs.
+- TilesRenderer: All instances will now share "processNodeQueue", "lruCache", "downloadQueue" and "priorityQueue" instances by default until optionally reassigned.
+- ImageOverlayPlugin: All image overlay instances share tile download & processing queues.
+
+### Fixed
+- GeneratedSurfacePlugin: Fix the plugin not applying uv ranges correctly.
+- ImageOverlayPlugin: Fix plugins not tracking tile visibility correctly.
+
+## [0.4.27] - 2026.05.25
+### Fixed
+- Bug introduced in adding "empty" tile events during traversal.
+
+## [0.4.26] - 2026.05.25
+### Added
+- DebugTilesPlugin: Added support for displaying empty tiles that stop traversal so tile set structure is more clear.
+
+### Fixed
+- EnvironmentControls: Zooming into nothing now works when geometry is not below the camera.
+- ImageOverlayPlugin: Fixed plugin firing "needs-rerender" rather than a "needs-render" event.
+
+### Changed
+- TilesRendererBase: "tile-download-start" event now specifies "url" rather than "uri" as a field.
+- TilesRendererBase: Deprecated "load-content" plugin.
+
+## [0.4.25] - 2026.05.21
 ### Added
 - "GeneratedSurfacePlugin" for generating an ellipsoidal or planar surface based on an "ImageOverlay".
+- Improved support for ExternalTexture memory tracking.
+- StructuralMetadata: Throw an error in `getPropertyTableData` when non-matching argument types are passed.
+- MVTOverlay, PMTilesOverlay: Overlays for reading and rendering vector tile formats as tile overlays.
+- TilesRenderer: Added "loadAncestors" option.
+- GlobeControls, EnvironmentControls: Add "enableFlight" option for free controls.
 
 ### Fixed
 - ImageFormatPlugins: Fixed case where tile nodes could be created and never released.
 - Converted remaining "three/examples/jsm/" paths to "three/addons/"
+- ImageOverlayPlugin: Geometry tiles will now continue to load and display even if an overlay texture fails to load.
+- ImageOverlayPlugin: If an overlay fails to load then a "load-error" will be thrown on TilesRenderer.
 
 ### Changed
-- Deprecated "ImageFormatPlugin" and derivative plugins to reduce code redundancy. Use "GeneratedSurfacePlugin", instead.
+- Deprecated "ImageFormatPlugin" and derivative plugins to reduce code redundancy. Use "GeneratedSurfacePlugin" & "ImageOverlayPlugin", instead.
 
 ## [0.4.24] - 2026.04.10
 ### Added
@@ -67,6 +101,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.4.20] - 2026-02-03
 ### Added
+- Added support for Babylon.js
 - TilesRenderer: Add "queued" status and stats counter for tiles in addition to "downloading" and "parsing".
 - TilesRenderer now removes tiles from the download queue if they are no longer needed for rendering. Tiles will continue to process if they are mid-download or parsing.
 - I3DMLoader: Added support for oct-encoded normals.
