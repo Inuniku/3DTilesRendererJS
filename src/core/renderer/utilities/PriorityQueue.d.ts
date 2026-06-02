@@ -6,11 +6,10 @@ export class PriorityQueue {
 	priorityCallback : ( itemA : any, itemB : any ) => number;
 	priorityFunction : ( item : any ) => number;
 
-	schedulingCallback : ( func : () => void ) => void;
-
 	get running(): boolean;
 
 	sort() : void;
+	flush( item : any ) : any;
 	has( item : any ) : boolean;
 	add( item : any, callback : ( item : any ) => any ) : Promise< any >;
 	remove( item : any ) : void;
