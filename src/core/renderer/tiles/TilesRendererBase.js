@@ -4,7 +4,6 @@ import { PriorityQueue } from '../utilities/PriorityQueue.js';
 import { runTraversal } from './traverseFunctions.js';
 import { UNLOADED, QUEUED, LOADING, PARSING, LOADED, FAILED } from '../constants.js';
 import { throttle } from '../utilities/throttle.js';
-import { MathUtils } from 'three';
 import { traverseSet } from '../utilities/TraversalUtils.js';
 
 /**
@@ -40,8 +39,8 @@ const regionErrorTarget = {
 //   distancePriorityCallback: sorts by inFrustum, hasUnrenderableContent, then distance. No error sort.
 const errorPriorityCallback = ( a, b ) => {
 
-	const aPriority = a.priority || 0;
-	const bPriority = b.priority || 0;
+	const aPriority = a.priority ?? Infinity;
+	const bPriority = b.priority ?? Infinity;
 
 	if ( aPriority !== bPriority ) {
 
@@ -69,7 +68,7 @@ const errorPriorityCallback = ( a, b ) => {
 		return a.traversal.distanceFromCamera > b.traversal.distanceFromCamera ? - 1 : 1;
 
 	} else if ( a.internal.depthFromRenderedParent !== b.internal.depthFromRenderedParent ) {
-		
+
 		return a.internal.depthFromRenderedParent > b.internal.depthFromRenderedParent ? - 1 : 1;
 
 	}
@@ -111,72 +110,12 @@ const distancePriorityCallback = ( a, b ) => {
 
 };
 
-function makeBool( value, shift ) {
-
-	return ( value ? 1 : 0 ) * Math.pow( 10, shift );
-
-}
-
-function makeNormalizedDigits( value, min, max, digits, shift ) {
-
-	const number = MathUtils.clamp( value, min, max ) / ( max - min );
-	return Math.round( number * Math.pow( 10, digits ) ) * Math.pow( 10, shift );
-
-}
-
-function makeDigits( value, digits, shift ) {
-
-	return Math.round( value * Math.pow( 10, digits ) ) * Math.pow( 10, shift );
-
-}
-
-const calculatePriority = ( tileSet ) => ( tile ) => {
-
-
-	const reverseError = 1 - tile.__error;
-
-	const priorityDeferred = tile.__priorityDeferred ?? false;
-	const foveatedFactor = tile.__foveatedFactor ?? 0;
-
-
-	let visibility = 2;
-	if ( tile.__inFrustum ) {
-
-		visibility --;
-
-	}
-	if ( tile.__used ) {
-
-		visibility --;
-
-	}
-
-	const d1 = makeDigits( visibility, 0, 2, 1, 9 );
-	const d2 = makeBool( priorityDeferred, 8 );
-	const d3 = makeNormalizedDigits( foveatedFactor, 0, 2, 4, 4 );
-	const d4 = makeNormalizedDigits( reverseError, 0, 100, 4, 0 );
-
-	const result = d1 + d2 + d3 + d4;
-	// preloadFlightDigits(1) | foveatedDeferDigits(1) | foveatedDigits(4) | preloadProgressiveResolutionDigits(1) | preferredSortingDigits(4) . depthDigits(the decimal digits)
-
-
-	//console.log( result, d1, d2, d3 );
-
-
-
-	return result;
-
-
-};
-
-
-
 // lru cache unload callback that takes two tiles to compare. Returning 1 means "tile a"
 // is unloaded first.
 const lruPriorityCallback = ( a, b ) => {
 
-	const aPriority = a.priority || 0;
-	const bPriority = b.priority || 0;
+	const aPriority = a.priority ?? Infinity;
+	const bPriority = b.priority ?? Infinity;
 
 	if ( aPriority !== bPriority ) {
 
@@ -215,26 +154,6 @@ const lruPriorityCallback = ( a, b ) => {
 	}
 
 	return 0;
-
-};
-
-const calculateLRUPriority = ( tile ) => {
-
-	const reverseError = 1 - tile.__error;
-	//const loadingState = 3 - tile.__loadingState;
-	const priorityDeferred = tile.__priorityDeferred ?? false;
-	const foveatedFactor = tile.__foveatedFactor ?? 0;
-
-
-	//const d1 = makeDigits( loadingState, 1, 9 );
-	const d2 = makeBool( priorityDeferred, 8 );
-	const d3 = makeNormalizedDigits( foveatedFactor, 0, 2, 4, 4 );
-	const d4 = makeNormalizedDigits( reverseError, 0, 100, 4, 0 );
-
-	const result = d2 + d3 + d4;
-	// preloadFlightDigits(1) | foveatedDeferDigits(1) | foveatedDigits(4) | preloadProgressiveResolutionDigits(1) | preferredSortingDigits(4) . depthDigits(the decimal digits)
-
-	return result;
 
 };
 
@@ -421,19 +340,14 @@ export const unifiedPriorityCallback = ( a, b ) => {
 // Default shared caches and queues
 const DEFAULT_LRU_CACHE = new LRUCache();
 DEFAULT_LRU_CACHE.unloadPriorityCallback = lruPriorityCallback;
-DEFAULT_LRU_CACHE.unloadPriorityFunction = calculateLRUPriority;
 
 const DEFAULT_DOWNLOAD_QUEUE = new PriorityQueue();
 DEFAULT_DOWNLOAD_QUEUE.maxJobs = 25;
 DEFAULT_DOWNLOAD_QUEUE.priorityCallback = unifiedPriorityCallback;
-DEFAULT_DOWNLOAD_QUEUE.priorityFunction = calculatePriority( this );
-DEFAULT_DOWNLOAD_QUEUE.name = 'downloadQueue';
 
 const DEFAULT_PARSE_QUEUE = new PriorityQueue();
 DEFAULT_PARSE_QUEUE.maxJobs = 5;
 DEFAULT_PARSE_QUEUE.priorityCallback = unifiedPriorityCallback;
-DEFAULT_PARSE_QUEUE.priorityFunction = calculatePriority( this );
-DEFAULT_PARSE_QUEUE.name = 'parseQueue';
 
 const DEFAULT_NODE_QUEUE = new PriorityQueue();
 DEFAULT_NODE_QUEUE.maxJobs = 25;

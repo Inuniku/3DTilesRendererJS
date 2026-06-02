@@ -774,6 +774,58 @@ after modifying properties such as `colorMode`, `displayBoxBounds`, or
 so changes can be reflected.
 
 
+## FoveatedRenderingPlugin
+
+Plugin that implements foveated rendering by prioritizing tiles based on their position
+relative to the camera's viewing direction. Tiles in the center of the view (foveal region)
+are loaded at higher priority and detail than tiles in peripheral vision.
+
+This is similar to Cesium's foveated screen-space error approach, improving performance by
+allowing peripheral tiles to load at lower detail levels. The plugin works by:
+
+1. Calculating the angular distance of each tile from the camera's view direction
+2. Defining a high-priority "foveal cone" (default: 10% of camera FOV)
+3. Setting tile priority based on this distance, with center tiles loading first
+4. Optionally deferring peripheral tiles that fall below the error threshold
+
+
+### .constructor
+
+```js
+constructor(
+	{
+		// Size of the high-priority foveal cone as a fraction of
+		// camera FOV (0.0-1.0). Smaller values create a tighter
+		// focus region.
+		foveationConeFactor = 0.1: number,
+
+		// Whether to defer loading of peripheral tiles that fall
+		// below error threshold due to SSE relaxation.
+		enableDeferral = true: boolean,
+	}
+)
+```
+
+### .foveationConeFactor
+
+```js
+foveationConeFactor: number
+```
+
+Size of the high-priority foveal cone as a fraction of maximum FOV. Tiles within
+this cone get maximum priority. Valid range: 0.0 to 1.0. Default: 0.1 (10% of FOV).
+
+
+### .enableDeferral
+
+```js
+enableDeferral: boolean
+```
+
+When true, peripheral tiles that fall below the error threshold due to SSE relaxation
+can be deferred in loading priority. Default: true.
+
+
 ## GeneratedSurfacePlugin
 
 Plugin that generates tiled surface geometry from a tiling scheme, optionally loading

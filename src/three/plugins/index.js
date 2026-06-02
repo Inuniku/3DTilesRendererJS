@@ -12,6 +12,7 @@ export * from './QuantizedMeshPlugin.js';
 export * from './images/ImageOverlayPlugin.js';
 export * from './LoadRegionPlugin.js';
 export * from './DebugTilesPlugin.js';
+export * from './FoveatedRenderingPlugin.js';
 
 // other formats
 export * from './images/GeneratedSurfacePlugin.js';

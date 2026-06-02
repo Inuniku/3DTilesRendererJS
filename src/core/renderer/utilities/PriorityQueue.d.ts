@@ -2,9 +2,7 @@ export class PriorityQueue {
 
 	maxJobs : number;
 	autoUpdate : boolean;
-	/** @deprecated */
 	priorityCallback : ( itemA : any, itemB : any ) => number;
-	priorityFunction : ( item : any ) => number;
 
 	get running(): boolean;
 
