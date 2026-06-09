@@ -341,7 +341,7 @@ export const unifiedPriorityCallback = ( a, b ) => {
 const DEFAULT_LRU_CACHE = new LRUCache();
 DEFAULT_LRU_CACHE.unloadPriorityCallback = lruPriorityCallback;
 
-const DEFAULT_DOWNLOAD_QUEUE = new PriorityQueue();
+export const DEFAULT_DOWNLOAD_QUEUE = new PriorityQueue();
 DEFAULT_DOWNLOAD_QUEUE.maxJobs = 25;
 DEFAULT_DOWNLOAD_QUEUE.priorityCallback = unifiedPriorityCallback;
 
@@ -481,7 +481,7 @@ export class TilesRendererBase {
 		 * @note Cannot be replaced once `update()` has been called for the first time.
 		 * @type {PriorityQueue}
 		 */
-		this.processNodeQueue = DEFAULT_PARSE_QUEUE;
+		this.processNodeQueue = DEFAULT_NODE_QUEUE;
 
 		/**
 		 * Loading and rendering statistics updated each frame. Fields:
@@ -1076,20 +1076,34 @@ export class TilesRendererBase {
 
 	disposeTile( tile ) {
 
-		// TODO: are these necessary? Are we disposing tiles when they are currently visible?
+		// TODO:
+		// The way this is structured means that plugin dispose tile functions will be fired first, then
+		// visibility changes. This ordering is not intuitive.
+
+		// Need to mirror the "traverseFunctions" behavior for empty tiles (eg internal tile sets)
 		if ( tile.traversal.visible ) {
 
-			this.invokeOnePlugin( plugin => plugin.setTileVisible && plugin.setTileVisible( tile, false ) );
+			if ( tile.internal.hasRenderableContent ) {
+
+				this.invokeOnePlugin( plugin => plugin.setTileVisible && plugin.setTileVisible( tile, false ) );
+
+			} else {
+
+				this.invokeOnePlugin( plugin => plugin.setEmptyTileVisible && plugin.setEmptyTileVisible( tile, false ) );
+
+			}
+
 			tile.traversal.visible = false;
 
 		}
 
-		if ( tile.traversal.active ) {
+		if ( tile.traversal.active && tile.internal.hasRenderableContent ) {
 
 			this.invokeOnePlugin( plugin => plugin.setTileActive && plugin.setTileActive( tile, false ) );
-			tile.traversal.active = false;
 
 		}
+
+		tile.traversal.active = false;
 
 		const { scene } = tile.engineData;
 		if ( scene ) {
@@ -1191,6 +1205,7 @@ export class TilesRendererBase {
 			distanceFromCamera: Infinity,
 			error: Infinity,
 			inFrustum: false,
+			wasInFrustum: false,
 			isLeaf: false,
 			used: false,
 			usedLastFrame: false,

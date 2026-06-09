@@ -16,11 +16,15 @@ export * from './LoadRegionPlugin.js';
 export * from './DebugTilesPlugin.js';
 export * from './FoveatedRenderingPlugin.js';
 
+export * from './mvt/MVTAnnotationsPlugin.js';
 
 // gltf extensions
 export * from './gltf/GLTFCesiumRTCExtension.js';
 export * from './gltf/GLTFStructuralMetadataExtension.js';
 export * from './gltf/GLTFMeshFeaturesExtension.js';
+
+// mvt utilities
+export * from './mvt/GlyphAtlasTexture.js';
 
 // loaders
 export * from './loaders/WMTSCapabilitiesLoader.js';
