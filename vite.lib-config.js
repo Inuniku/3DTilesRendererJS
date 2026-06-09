@@ -1,5 +1,6 @@
 import { loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 import { packageAliases } from './vite.config.js';
 
 export default ( { mode } ) => {
@@ -33,7 +34,7 @@ export default ( { mode } ) => {
 			rollupOptions: {
 				external: ( p ) => {
 
-					return ! /^[./\\]/.test( p ) && ! /^3d-tiles-renderer/.test( p );
+					return ! /^[./\\]/.test( p ) && ! path.isAbsolute( p ) && ! /^src[\\/]/.test( p ) && ! /^3d-tiles-renderer/.test( p );
 
 				},
 			},
