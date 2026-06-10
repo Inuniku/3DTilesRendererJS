@@ -18,7 +18,7 @@ export interface FoveatedRenderingPluginOptions {
  * Plugin that implements foveated rendering by prioritizing tiles based on their position
  * relative to the camera's viewing direction. Tiles in the center of the view (foveal region)
  * are loaded at higher priority and detail than tiles in peripheral vision.
- * 
+ *
  * This is similar to Cesium's foveated screen-space error approach, improving performance by
  * allowing peripheral tiles to load at lower detail levels.
  */

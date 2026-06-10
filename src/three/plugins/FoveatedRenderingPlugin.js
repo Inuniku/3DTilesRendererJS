@@ -6,10 +6,10 @@ const DEG2RAD = MathUtils.DEG2RAD;
  * Plugin that implements foveated rendering by prioritizing tiles based on their position
  * relative to the camera's viewing direction. Tiles in the center of the view (foveal region)
  * are loaded at higher priority and detail than tiles in peripheral vision.
- * 
+ *
  * This is similar to Cesium's foveated screen-space error approach, improving performance by
  * allowing peripheral tiles to load at lower detail levels.
- * 
+ *
  * @example
  * ```js
  * const foveatedPlugin = new FoveatedRenderingPlugin({
@@ -24,9 +24,9 @@ export class FoveatedRenderingPlugin {
 	/**
 	 * Creates a new FoveatedRenderingPlugin instance.
 	 * @param {Object} [options={}] Configuration options
-	 * @param {number} [options.foveationConeFactor=0.1] Size of the high-priority foveal cone 
+	 * @param {number} [options.foveationConeFactor=0.1] Size of the high-priority foveal cone
 	 * as a fraction of camera FOV (0.0-1.0). Smaller values create a tighter focus region.
-	 * @param {boolean} [options.enableDeferral=true] Whether to defer loading of peripheral tiles 
+	 * @param {boolean} [options.enableDeferral=true] Whether to defer loading of peripheral tiles
 	 * that fall below error threshold due to SSE relaxation.
 	 */
 	constructor( options = {} ) {
@@ -129,12 +129,12 @@ export class FoveatedRenderingPlugin {
 
 			// Calculate camera position in group local space
 			this._cameraPosition.copy( info.position );
-			
+
 			// Calculate camera direction: get world direction and transform to group local space
 			camera.getWorldDirection( this._cameraDirection );
 			this._cameraDirection.transformDirection( tiles.group.matrixWorldInverse );
 			this._cameraDirection.normalize();
-			
+
 			this._ray.set( this._cameraPosition, this._cameraDirection );
 
 			// Find closest point on the ray to the sphere center
@@ -210,21 +210,21 @@ export class FoveatedRenderingPlugin {
 		// Set tile priority based on foveation
 		// Priority encoding: visibility (most significant) + foveation + error (least significant)
 		// Lower priority number = higher priority (loaded first)
-		
+
 		const visibility = target.inView ? 0 : 1;
 		const inFrustum = tile.traversal?.inFrustum ? 0 : 1;
 		const reverseError = 1 - MathUtils.clamp( target.error, 0, 1 );
-		
+
 		// Normalize foveated factor to 0-10000 range for priority encoding
 		const foveatedPriority = Math.round( MathUtils.clamp( minFoveatedFactor, 0, 2 ) * 5000 );
 		const errorPriority = Math.round( reverseError * 10000 );
-		
+
 		// Combine into single priority value with appropriate weighting
 		// Format: [visibility:1][inFrustum:1][foveation:4-5 digits][error:4-5 digits]
-		tile.priority = 
-			visibility * 1e10 + 
-			inFrustum * 1e9 + 
-			foveatedPriority * 1e4 + 
+		tile.priority =
+			visibility * 1e10 +
+			inFrustum * 1e9 +
+			foveatedPriority * 1e4 +
 			errorPriority;
 
 		// Optionally mark tiles as deferred if they can be relaxed significantly

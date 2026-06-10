@@ -170,7 +170,7 @@ DEFAULT_GROUP.matrixWorldInverse = new Matrix4();
  * @param {boolean} [props.overrideRenderLoop] - If true, renders the main scene before drawing the compass overlay.
  * @param {ReactNode} [props.children] - Custom compass graphic replacing the default. Should fit within a -0.5 to 0.5 unit cube with +Y pointing north and +X pointing east.
  */
-export function CompassGizmo( { children, overrideRenderLoop, mode = '3d', margin = 10, scale = 35, visible = true, ellipsoid, tileGroup, ...rest } ) {
+export function CompassGizmo( { children, overrideRenderLoop, mode = '3d', margin = 10, scale = 35, visible = true, ellipsoid: inputEllipsoid, tileGroup, ...rest } ) {
 
 	const [ defaultCamera, defaultScene, size ] = useThree( state => [ state.camera, state.scene, state.size ] );
 	const ellipsoidContext = useContext( EllipsoidContext );
@@ -196,7 +196,7 @@ export function CompassGizmo( { children, overrideRenderLoop, mode = '3d', margi
 
 	useFrame( () => {
 
-		const ellipsoid = ellipsoidContext?.ellipsoid ?? ellipsoid ?? WGS84_ELLIPSOID;
+		const ellipsoid = ellipsoidContext?.ellipsoid ?? inputEllipsoid ?? WGS84_ELLIPSOID;
 		const frame = ellipsoidContext?.frame ?? tileGroup ?? DEFAULT_GROUP;
 
 		const group = groupRef.current;
